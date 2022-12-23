@@ -80,6 +80,7 @@ public class ServerThread extends Thread{
 
     public void subscribe(String channel){
         this.channel = channel;
+        sendMessage("SERVER: " + userName + " Has joined!" );
     }
 
     public void unSubscribe(String channel){

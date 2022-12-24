@@ -1,7 +1,10 @@
 package org.nsd;
 
-import java.io.*;
-import java.net.*;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.nsd.requests.*;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
@@ -28,7 +31,11 @@ public class Client{
 
     public void sendMessage(){
         try{
+            OpenRequest openReq = new OpenRequest(userName);
             bufferedWriter.write(userName);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+            bufferedWriter.write(openReq.toJSONString());
             bufferedWriter.newLine();
             bufferedWriter.flush();
 
@@ -75,6 +82,9 @@ public class Client{
                 UnsubscribeRequest unsubReq = new UnsubscribeRequest(userName, instruction);
                 message = unsubReq.toJSONString();
                 break;
+            case "/create":
+                OpenRequest openReq = new OpenRequest(userName);
+                message = openReq.toJSONString();
             case "/get":
                 GetRequest getReq = new GetRequest(userName, Integer.parseInt(instruction));
                 message = getReq.toJSONString();
@@ -89,13 +99,16 @@ public class Client{
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String message;
+                String response;
 
                 while(socket.isConnected()){
                     try{
-                        message = bufferedReader.readLine();
-                        System.out.println(message);
-                    }catch(IOException e){
+                        response = bufferedReader.readLine();
+
+                        JSONParser parser = new JSONParser();
+                        JSONObject obj = (JSONObject)parser.parse(response);
+                        handleResponse(obj);
+                    }catch(IOException | ParseException e){
                         closeAll(socket, bufferedWriter, bufferedReader);
                     }
                 }
@@ -113,6 +126,18 @@ public class Client{
             }
         }catch (IOException e){
             e.printStackTrace();
+        }
+    }
+
+    public void handleResponse(JSONObject response) throws ParseException {
+        switch(response.get("_class").toString()){
+            case "SuccessResponse":
+                System.out.println();
+                break;
+            default:
+
+
+
         }
     }
 

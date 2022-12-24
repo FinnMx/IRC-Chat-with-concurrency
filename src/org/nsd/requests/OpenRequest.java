@@ -1,12 +1,12 @@
-package org.nsd;
+package org.nsd.requests;
 
 import org.json.simple.JSONObject;
 
-public class OpenRequest extends Request{
+public class OpenRequest extends Request {
 
-    public OpenRequest(String userName){
+    public OpenRequest(String channel){
         set_class(OpenRequest.class.getSimpleName());
-        setIdentity(userName);
+        setIdentity(channel);
     }
 
     public Object toJSON(){

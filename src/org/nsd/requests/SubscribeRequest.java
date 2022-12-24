@@ -1,8 +1,8 @@
-package org.nsd;
+package org.nsd.requests;
 
 import org.json.simple.JSONObject;
 
-public class SubscribeRequest extends Request{
+public class SubscribeRequest extends Request {
     private String channel;
 
     public SubscribeRequest(String userName, String channel){

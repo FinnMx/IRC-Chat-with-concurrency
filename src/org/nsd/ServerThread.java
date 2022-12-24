@@ -3,6 +3,8 @@ package org.nsd;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.nsd.responses.ErrorResponse;
+import org.nsd.responses.SuccessResponse;
 
 import java.io.*;
 import java.net.Socket;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 public class ServerThread extends Thread{
 
     public static ArrayList<ServerThread> serverThreads = new ArrayList<>();
+    public static ArrayList<String> channelList = new ArrayList<>();
     private String userName;
     private Socket socket;
     private BufferedWriter bufferedWriter;
@@ -45,13 +48,54 @@ public class ServerThread extends Thread{
     }
 
     public void handleRequest(JSONObject obj) throws ParseException {
-        switch(obj.get("_class").toString()){
-            case "PublishRequest":
-                sendMessage(obj);
-                break;
-            default:
-                break;
+        try {
+            JSONObject response = new JSONObject();
+            switch (obj.get("_class").toString()) {
+                case "PublishRequest":
+                    sendMessage(obj);
+                    break;
+                case "OpenRequest":
+                    response = openRequest(obj);
+                    break;
+                default:
+                    break;
+            }
+            bufferedWriter.write(response.toJSONString());
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+        }catch (IOException e){
+            closeAll(socket, bufferedWriter, bufferedReader);
         }
+    }
+
+    public void sendMessage(JSONObject obj) throws ParseException {
+        JSONParser parser = new JSONParser();
+        JSONObject message = (JSONObject)parser.parse(obj.get("message").toString());
+        String userName = message.get("from").toString();
+        String channel = obj.get("identity").toString();
+        String body = message.get("body").toString();
+        for(ServerThread serverThread : serverThreads){
+            try{
+                if(!serverThread.userName.equals(userName) && serverThread.channel.equals(channel)){
+                    serverThread.bufferedWriter.write(userName + ": " + body);
+                    serverThread.bufferedWriter.newLine();
+                    serverThread.bufferedWriter.flush();
+                }
+            }catch (IOException e){
+                closeAll(socket, bufferedWriter, bufferedReader);
+            }
+        }
+    }
+
+    public JSONObject openRequest(JSONObject obj){
+        for(String channel: channelList){
+            if(channel == obj.get("identity")) {
+                ErrorResponse error = new ErrorResponse("Channel already exists/user already exists");
+                return error.toJSON();
+            }
+        }
+        SuccessResponse success = new SuccessResponse();
+        return success.toJSON();
     }
 
     public void help() {
@@ -79,25 +123,6 @@ public class ServerThread extends Thread{
 
     public void get(int time){
 
-    }
-
-    public void sendMessage(JSONObject obj) throws ParseException {
-        JSONParser parser = new JSONParser();
-        JSONObject message = (JSONObject)parser.parse(obj.get("message").toString());
-        String userName = message.get("from").toString();
-        String channel = obj.get("identity").toString();
-        String body = message.get("body").toString();
-        for(ServerThread serverThread : serverThreads){
-            try{
-                if(!serverThread.userName.equals(userName) && serverThread.channel.equals(channel)){
-                    serverThread.bufferedWriter.write(userName + ": " + body);
-                    serverThread.bufferedWriter.newLine();
-                    serverThread.bufferedWriter.flush();
-                }
-            }catch (IOException e){
-                closeAll(socket, bufferedWriter, bufferedReader);
-            }
-        }
     }
 
     public void removeServerThread(){

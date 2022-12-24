@@ -1,4 +1,4 @@
-package org.nsd;
+package org.nsd.requests;
 import org.json.simple.*;
 
 public abstract class Request implements JSONAware {

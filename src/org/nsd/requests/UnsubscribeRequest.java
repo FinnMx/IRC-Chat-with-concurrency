@@ -1,8 +1,8 @@
-package org.nsd;
+package org.nsd.requests;
 
 import org.json.simple.JSONObject;
 
-public class UnsubscribeRequest extends Request{
+public class UnsubscribeRequest extends Request {
     private String channel;
 
     public UnsubscribeRequest(String userName, String channel){

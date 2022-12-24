@@ -1,8 +1,8 @@
-package org.nsd;
+package org.nsd.requests;
 
 import org.json.simple.JSONObject;
 
-public class PublishRequest extends Request{
+public class PublishRequest extends Request {
     private Message message;
 
     public PublishRequest(String channel, Message message){

@@ -1,8 +1,8 @@
-package org.nsd;
+package org.nsd.requests;
 
 import org.json.simple.JSONObject;
 
-public class Message extends Request{
+public class Message extends Request {
     private String from;
     private int when;
     private String body;

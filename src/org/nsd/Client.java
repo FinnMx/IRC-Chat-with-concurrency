@@ -23,7 +23,7 @@ public class Client{
             this.userName = userName;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.currentChannel = userName;
+            this.currentChannel = "general";
         }catch (IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }
@@ -99,7 +99,7 @@ public class Client{
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String response;
+                String response = null;
 
                 while(socket.isConnected()){
                     try{
@@ -108,7 +108,9 @@ public class Client{
                         JSONParser parser = new JSONParser();
                         JSONObject obj = (JSONObject)parser.parse(response);
                         handleResponse(obj);
-                    }catch(IOException | ParseException e){
+                    }catch(ParseException e){
+                        System.out.println(response);
+                    }catch (IOException i){
                         closeAll(socket, bufferedWriter, bufferedReader);
                     }
                 }
@@ -132,7 +134,7 @@ public class Client{
     public void handleResponse(JSONObject response) throws ParseException {
         switch(response.get("_class").toString()){
             case "SuccessResponse":
-                System.out.println();
+                //could print out messages here, would make more sense
                 break;
             default:
 

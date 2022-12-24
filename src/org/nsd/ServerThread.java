@@ -52,7 +52,7 @@ public class ServerThread extends Thread{
             JSONObject response = new JSONObject();
             switch (obj.get("_class").toString()) {
                 case "PublishRequest":
-                    sendMessage(obj);
+                    response = sendMessage(obj);
                     break;
                 case "OpenRequest":
                     response = openRequest(obj);
@@ -68,7 +68,7 @@ public class ServerThread extends Thread{
         }
     }
 
-    public void sendMessage(JSONObject obj) throws ParseException {
+    public JSONObject sendMessage(JSONObject obj) throws ParseException {
         JSONParser parser = new JSONParser();
         JSONObject message = (JSONObject)parser.parse(obj.get("message").toString());
         String userName = message.get("from").toString();
@@ -85,6 +85,8 @@ public class ServerThread extends Thread{
                 closeAll(socket, bufferedWriter, bufferedReader);
             }
         }
+        SuccessResponse success = new SuccessResponse();
+        return success.toJSON();
     }
 
     public JSONObject openRequest(JSONObject obj){
@@ -151,7 +153,7 @@ public class ServerThread extends Thread{
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.userName = bufferedReader.readLine();
             serverThreads.add(this);
-            this.channel = userName;
+            this.channel = "general";
             //sendMessage("SERVER: " + userName + " Has joined!" );
         }catch(IOException ie)
         {

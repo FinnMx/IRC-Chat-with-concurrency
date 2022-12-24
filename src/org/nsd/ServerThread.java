@@ -1,5 +1,9 @@
 package org.nsd;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -30,14 +34,14 @@ public class ServerThread extends Thread{
     }
 
     public void handleInput(String message){
-        if(message.charAt(0) == '/'){
-            handleCommands(message);
-        }
-        else{
-            sendMessage(message);
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject obj = (JSONObject) parser.parse(message);
+        }catch (ParseException e){
+            closeAll(socket, bufferedWriter, bufferedReader);
         }
     }
-
+    /*
     public void handleCommands(String message){
         int i = message.indexOf(' ');
         String command = message;
@@ -64,6 +68,7 @@ public class ServerThread extends Thread{
         }
     }
 
+     */
     public void help() {
         try {
             bufferedWriter.write("\nHeres a list of commands:\n" +

@@ -32,13 +32,53 @@ public class Client{
             Scanner scanner = new Scanner(System.in);
             while(socket.isConnected()){
                 String message = scanner.nextLine();
-                bufferedWriter.write(message);
+                bufferedWriter.write(handleInput(message));
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
             }
         }catch (IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }
+    }
+
+    public String handleInput(String message){
+        if(message.charAt(0) == '/'){
+            return handleCommands(message);
+        }
+        else{
+            Message request = new Message(userName,message);
+            return request.toJSONString();
+        }
+
+    }
+
+    public String handleCommands(String message){
+        int i = message.indexOf(' ');
+        String command = message;
+        String instruction = "";
+        if(i != -1) {
+            command = message.substring(0, i);
+            instruction = message.substring(i + 1);
+        }
+        switch (command){
+            case "/help":
+                break;
+            case "/subscribe":
+                SubscribeRequest subReq = new SubscribeRequest(userName, instruction);
+                message = subReq.toJSONString();
+                break;
+            case "/unsubscribe":
+                UnsubscribeRequest unsubReq = new UnsubscribeRequest(userName, instruction);
+                message = unsubReq.toJSONString();
+                break;
+            case "/get":
+                GetRequest getReq = new GetRequest(userName, Integer.parseInt(instruction));
+                message = getReq.toJSONString();
+                break;
+            default:
+                System.out.println("invalid command...");
+        }
+        return message;
     }
 
     public void recieveMessage(){

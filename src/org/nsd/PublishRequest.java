@@ -5,9 +5,9 @@ import org.json.simple.JSONObject;
 public class PublishRequest extends Request{
     private Message message;
 
-    public PublishRequest(String userName, Message message){
+    public PublishRequest(String channel, Message message){
         set_class(PublishRequest.class.getSimpleName());
-        setIdentity(userName);
+        setIdentity(channel);
         this.message = message;
     }
 

@@ -36,39 +36,24 @@ public class ServerThread extends Thread{
     public void handleInput(String message){
         try {
             JSONParser parser = new JSONParser();
-            JSONObject obj = (JSONObject) parser.parse(message);
+            JSONObject obj = (JSONObject)parser.parse(message);
+
+            handleRequest(obj);
         }catch (ParseException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }
     }
-    /*
-    public void handleCommands(String message){
-        int i = message.indexOf(' ');
-        String command = message;
-        String instruction = "";
-        if(i != -1) {
-            command = message.substring(0, i);
-            instruction = message.substring(i + 1);
-        }
-        switch (command){
-            case "/help":
-                help();
-                break;
-            case "/subscribe":
-                subscribe(instruction);
-                break;
-            case "/unsubscribe":
-                unSubscribe(instruction);
-                 break;
-            case "/get":
-                get(Integer.parseInt(instruction));
+
+    public void handleRequest(JSONObject obj) throws ParseException {
+        switch(obj.get("_class").toString()){
+            case "PublishRequest":
+                sendMessage(obj);
                 break;
             default:
-                System.out.println("invalid command...");
+                break;
         }
     }
 
-     */
     public void help() {
         try {
             bufferedWriter.write("\nHeres a list of commands:\n" +
@@ -85,7 +70,7 @@ public class ServerThread extends Thread{
 
     public void subscribe(String channel){
         this.channel = channel;
-        sendMessage("SERVER: " + userName + " Has joined!" );
+        //sendMessage("SERVER: " + userName + " Has joined!" );
     }
 
     public void unSubscribe(String channel){
@@ -96,11 +81,16 @@ public class ServerThread extends Thread{
 
     }
 
-    public void sendMessage(String message){
+    public void sendMessage(JSONObject obj) throws ParseException {
+        JSONParser parser = new JSONParser();
+        JSONObject message = (JSONObject)parser.parse(obj.get("message").toString());
+        String userName = message.get("from").toString();
+        String channel = obj.get("identity").toString();
+        String body = message.get("body").toString();
         for(ServerThread serverThread : serverThreads){
             try{
                 if(!serverThread.userName.equals(userName) && serverThread.channel.equals(channel)){
-                    serverThread.bufferedWriter.write(message);
+                    serverThread.bufferedWriter.write(userName + ": " + body);
                     serverThread.bufferedWriter.newLine();
                     serverThread.bufferedWriter.flush();
                 }
@@ -112,7 +102,7 @@ public class ServerThread extends Thread{
 
     public void removeServerThread(){
         serverThreads.remove(this);
-        sendMessage("SERVER: " + userName + " has left!");
+        //sendMessage("SERVER: " + userName + " has left!");
     }
 
     public void closeAll(Socket socket, BufferedWriter toClient, BufferedReader fromClient){
@@ -137,7 +127,7 @@ public class ServerThread extends Thread{
             this.userName = bufferedReader.readLine();
             serverThreads.add(this);
             this.channel = userName;
-            sendMessage("SERVER: " + userName + " Has joined!" );
+            //sendMessage("SERVER: " + userName + " Has joined!" );
         }catch(IOException ie)
         {
             closeAll(socket, bufferedWriter, bufferedReader);

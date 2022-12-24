@@ -17,16 +17,4 @@ public class OpenRequest extends Request{
         return obj;
     }
 
-    /*
-    public OpenRequest fromJSON(Object val){
-        try{
-            JSONObject obj = (JSONObject)val;
-            if(!get_class().equals(obj.get("_class"))){
-                return null;
-            }
-
-        }
-    }
-    */
-
 }

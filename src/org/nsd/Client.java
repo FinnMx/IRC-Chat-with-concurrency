@@ -12,12 +12,15 @@ public class Client{
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
 
+    private String currentChannel;
+
     public Client(Socket socket, String userName){
         try {
             this.socket = socket;
             this.userName = userName;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.currentChannel = userName;
         }catch (IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }
@@ -47,7 +50,8 @@ public class Client{
         }
         else{
             Message request = new Message(userName,message);
-            return request.toJSONString();
+            PublishRequest pubReq = new PublishRequest(currentChannel, request);
+            return pubReq.toJSONString();
         }
 
     }

@@ -60,6 +60,10 @@ public class ServerThread extends Thread{
                 default:
                     break;
             }
+            //this is where logging can be done for all requests/exchanges
+            System.out.println(obj.toJSONString());
+            System.out.println(response.toJSONString());
+
             bufferedWriter.write(response.toJSONString());
             bufferedWriter.newLine();
             bufferedWriter.flush();
@@ -89,6 +93,20 @@ public class ServerThread extends Thread{
         return success.toJSON();
     }
 
+    public void serverMessage(String userName, String message) throws IOException {
+        for(ServerThread serverThread : serverThreads){
+            try{
+                if(!serverThread.userName.equals(userName) && serverThread.channel.equals(channel)){
+                    serverThread.bufferedWriter.write(userName + " " + message);
+                    serverThread.bufferedWriter.newLine();
+                    serverThread.bufferedWriter.flush();
+                }
+            }catch (IOException e){
+                closeAll(socket, bufferedWriter, bufferedReader);
+            }
+        }
+    }
+
     public JSONObject openRequest(JSONObject obj){
         for(String channel: channelList){
             if(channel == obj.get("identity")) {
@@ -116,7 +134,6 @@ public class ServerThread extends Thread{
 
     public void subscribe(String channel){
         this.channel = channel;
-        //sendMessage("SERVER: " + userName + " Has joined!" );
     }
 
     public void unSubscribe(String channel){
@@ -127,9 +144,14 @@ public class ServerThread extends Thread{
 
     }
 
-    public void removeServerThread(){
-        serverThreads.remove(this);
-        //sendMessage("SERVER: " + userName + " has left!");
+    public void removeServerThread() {
+        try {
+            serverMessage(userName, "has left!");
+            serverThreads.remove(this);
+
+        }catch(IOException e){
+            closeAll(socket, bufferedWriter, bufferedReader);
+        }
     }
 
     public void closeAll(Socket socket, BufferedWriter toClient, BufferedReader fromClient){
@@ -154,12 +176,11 @@ public class ServerThread extends Thread{
             this.userName = bufferedReader.readLine();
             serverThreads.add(this);
             this.channel = "general";
-            //sendMessage("SERVER: " + userName + " Has joined!" );
+            serverMessage(userName, "has joined!");
         }catch(IOException ie)
         {
             closeAll(socket, bufferedWriter, bufferedReader);
         }
-
 
     }
 }

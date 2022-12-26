@@ -57,6 +57,8 @@ public class ServerThread extends Thread{
                 case "OpenRequest":
                     response = openRequest(obj);
                     break;
+                case "SubscribeRequest":
+                    response = subscribeRequest(obj);
                 default:
                     break;
             }
@@ -70,6 +72,17 @@ public class ServerThread extends Thread{
         }catch (IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }
+    }
+
+    public JSONObject subscribeRequest(JSONObject obj) throws IOException {
+        SuccessResponse success = new SuccessResponse();
+        if(obj.get("channel") == channel){
+            bufferedWriter.write("You are already in this channel!");
+            return success.toJSON();
+        }
+            channel = obj.get("channel").toString();
+            return success.toJSON();
+
     }
 
     public JSONObject sendMessage(JSONObject obj) throws ParseException {

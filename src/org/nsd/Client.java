@@ -74,7 +74,7 @@ public class Client{
         switch (command){
             case "/help":
                 break;
-            case "/subscribe":
+            case "/join":
                 SubscribeRequest subReq = new SubscribeRequest(userName, instruction);
                 message = subReq.toJSONString();
                 break;

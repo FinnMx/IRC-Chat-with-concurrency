@@ -82,7 +82,7 @@ public class Client{
                 message = unsubReq.toJSONString();
                 break;
             case "/create":
-                OpenRequest openReq = new OpenRequest(userName);
+                OpenRequest openReq = new OpenRequest(instruction);
                 message = openReq.toJSONString();
                 break;
             case "/get":
@@ -90,7 +90,9 @@ public class Client{
                 message = getReq.toJSONString();
                 break;
             default:
-                System.out.println("invalid command...");
+                DefaultRequest invalid = new DefaultRequest("Invalid");
+                message = invalid.toJSONString();
+                break;
         }
         return message;
     }
@@ -139,6 +141,7 @@ public class Client{
                 break;
             case "ErrorResponse":
                 System.out.println(response.get("error"));
+                break;
             default:
 
         }

@@ -74,6 +74,7 @@ public class ServerThread extends Thread{
                     response = help();
                     break;
                 default:
+                    response = invalid();
                     break;
             }
             //this is where logging can be done for all requests/exchanges
@@ -86,12 +87,19 @@ public class ServerThread extends Thread{
         }
     }
 
+    public JSONObject invalid(){
+        ErrorResponse error = new ErrorResponse("Invalid command, type /help to view a list of commands");
+        return error.toJSON();
+    }
+
     public JSONObject help() {
-            writeMessage("\nHere's a list of commands:\n" +
-                    "- /help (Displays all commands)\n" +
-                    "- /subscribe <channel> (subscribes you to a channel/Joins a channel)\n" +
-                    "- /unsubscribe <channel> (unsubscribes you from a channel)\n" +
-                    "- /get <timestamp> (returns all messages since the timestamp which is in seconds.)\n");
+            writeMessage("""
+                    Here's a list of commands:
+                    - /help (Displays all commands)
+                    - /create <channel> (create a new channel)
+                    - /join <channel> (subscribes you to a channel/Joins a channel)
+                    - /leave (disconnects you, sends you back to general)
+                    - /get <timestamp> (returns all messages since the timestamp which is in seconds.)""");
         SuccessResponse success = new SuccessResponse();
         return success.toJSON();
     }
@@ -160,6 +168,7 @@ public class ServerThread extends Thread{
             }
         }
         channelList.add(obj.get("identity").toString());
+        writeMessage("Channel " + obj.get("identity") + " has been created!");
         SuccessResponse success = new SuccessResponse();
         return success.toJSON();
     }

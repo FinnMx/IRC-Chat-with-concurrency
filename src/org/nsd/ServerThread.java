@@ -73,6 +73,9 @@ public class ServerThread extends Thread{
                 case "Help":
                     response = help();
                     break;
+                case "ViewChannels":
+                    response = viewChannels();
+                    break;
                 default:
                     response = invalid();
                     break;
@@ -87,6 +90,14 @@ public class ServerThread extends Thread{
         }
     }
 
+    public JSONObject viewChannels(){
+        for (String x: channelList){
+            writeMessage("- " + x);
+        }
+        SuccessResponse success = new SuccessResponse();
+        return success.toJSON();
+    }
+
     public JSONObject invalid(){
         ErrorResponse error = new ErrorResponse("Invalid command, type /help to view a list of commands");
         return error.toJSON();
@@ -99,6 +110,7 @@ public class ServerThread extends Thread{
                     - /create <channel> (create a new channel)
                     - /join <channel> (subscribes you to a channel/Joins a channel)
                     - /leave (disconnects you, sends you back to general)
+                    - /viewchannels (displays a list of all channels)
                     - /get <timestamp> (returns all messages since the timestamp which is in seconds.)""");
         SuccessResponse success = new SuccessResponse();
         return success.toJSON();

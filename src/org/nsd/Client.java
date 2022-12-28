@@ -89,6 +89,10 @@ public class Client{
                 GetRequest getReq = new GetRequest(userName, Integer.parseInt(instruction));
                 message = getReq.toJSONString();
                 break;
+            case "/viewchannels":
+                DefaultRequest viewChannels = new DefaultRequest("ViewChannels");
+                message = viewChannels.toJSONString();
+                break;
             default:
                 DefaultRequest invalid = new DefaultRequest("Invalid");
                 message = invalid.toJSONString();

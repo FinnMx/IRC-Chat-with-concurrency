@@ -36,6 +36,16 @@ public class ServerThread extends Thread{
         }
     }
 
+    public void writeMessage(String message){
+        try{
+            bufferedWriter.write(message);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+        }catch (IOException e){
+            closeAll(socket, bufferedWriter, bufferedReader);
+        }
+    }
+
     public void handleInput(String message){
         try {
             JSONParser parser = new JSONParser();
@@ -59,6 +69,10 @@ public class ServerThread extends Thread{
                     break;
                 case "SubscribeRequest":
                     response = subscribeRequest(obj);
+                    break;
+                case "Help":
+                    response = help();
+                    break;
                 default:
                     break;
             }
@@ -66,23 +80,32 @@ public class ServerThread extends Thread{
             System.out.println(obj.toJSONString());
             System.out.println(response.toJSONString());
 
-            bufferedWriter.write(response.toJSONString());
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
+            writeMessage(response.toJSONString());
         }catch (IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }
     }
 
+    public JSONObject help() {
+            writeMessage("\nHere's a list of commands:\n" +
+                    "- /help (Displays all commands)\n" +
+                    "- /subscribe <channel> (subscribes you to a channel/Joins a channel)\n" +
+                    "- /unsubscribe <channel> (unsubscribes you from a channel)\n" +
+                    "- /get <timestamp> (returns all messages since the timestamp which is in seconds.)\n");
+        SuccessResponse success = new SuccessResponse();
+        return success.toJSON();
+    }
+
     public JSONObject subscribeRequest(JSONObject obj) throws IOException {
         SuccessResponse success = new SuccessResponse();
         String requestedChannel = obj.get("channel").toString();
-        if(requestedChannel == channel){
-            bufferedWriter.write("You are already in this channel!");
+        if(requestedChannel.equals(channel)){
+            writeMessage("You are already in this channel!");
             return success.toJSON();
         }
         if(searchList(channelList, requestedChannel)){
             channel = requestedChannel;
+            serverMessage(obj.get("identity").toString(), "has joined!");
             return success.toJSON();
         }
         ErrorResponse error = new ErrorResponse("This channel doesn't exist");
@@ -107,15 +130,9 @@ public class ServerThread extends Thread{
         String channel = obj.get("identity").toString();
         String body = message.get("body").toString();
         for(ServerThread serverThread : serverThreads){
-            try{
                 if(!serverThread.userName.equals(userName) && serverThread.channel.equals(channel)){
-                    serverThread.bufferedWriter.write(userName + ": " + body);
-                    serverThread.bufferedWriter.newLine();
-                    serverThread.bufferedWriter.flush();
+                    writeMessage(userName + ": " + body);
                 }
-            }catch (IOException e){
-                closeAll(socket, bufferedWriter, bufferedReader);
-            }
         }
         SuccessResponse success = new SuccessResponse();
         return success.toJSON();
@@ -145,20 +162,6 @@ public class ServerThread extends Thread{
         channelList.add(obj.get("identity").toString());
         SuccessResponse success = new SuccessResponse();
         return success.toJSON();
-    }
-
-    public void help() {
-        try {
-            bufferedWriter.write("\nHeres a list of commands:\n" +
-                    "- /help (Displays all commands)\n" +
-                    "- /subscribe <channel> (subscribes you to a channel/Joins a channel)\n" +
-                    "- /unsubscribe <channel> (unsubscribes you from a channel)\n" +
-                    "- /get <timestamp> (returns all messages since the timestamp which is in seconds.)\n");
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-        }catch(IOException e){
-            closeAll(socket, bufferedWriter, bufferedReader);
-        }
     }
 
     public void unSubscribe(String channel){
@@ -206,6 +209,5 @@ public class ServerThread extends Thread{
         {
             closeAll(socket, bufferedWriter, bufferedReader);
         }
-
     }
 }

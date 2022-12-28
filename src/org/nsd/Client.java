@@ -70,6 +70,8 @@ public class Client{
         }
         switch (command){
             case "/help":
+                DefaultRequest help = new DefaultRequest("Help");
+                message = help.toJSONString();
                 break;
             case "/join":
                 SubscribeRequest subReq = new SubscribeRequest(userName, instruction);
@@ -82,6 +84,7 @@ public class Client{
             case "/create":
                 OpenRequest openReq = new OpenRequest(userName);
                 message = openReq.toJSONString();
+                break;
             case "/get":
                 GetRequest getReq = new GetRequest(userName, Integer.parseInt(instruction));
                 message = getReq.toJSONString();
@@ -91,6 +94,7 @@ public class Client{
         }
         return message;
     }
+
 
     public void recieveMessage(){
         new Thread(new Runnable() {
@@ -116,23 +120,6 @@ public class Client{
 
     }
 
-    /*
-    public void startDisplay(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (socket.isConnected()){
-                    try{
-
-                    }catch (IOException e){
-                        closeAll(socket, bufferedWriter, bufferedReader);
-                    }
-                }
-            }
-        }).start();
-    }
-     */
-
     public void closeAll(Socket socket, BufferedWriter toClient, BufferedReader fromClient){
         try{
             if(fromClient != null && toClient != null && socket != null){
@@ -150,6 +137,8 @@ public class Client{
             case "SuccessResponse":
                 //could print out messages here, would make more sense
                 break;
+            case "ErrorResponse":
+                System.out.println(response.get("error"));
             default:
 
         }

@@ -76,18 +76,33 @@ public class ServerThread extends Thread{
 
     public JSONObject subscribeRequest(JSONObject obj) throws IOException {
         SuccessResponse success = new SuccessResponse();
-        if(obj.get("channel") == channel){
+        String requestedChannel = obj.get("channel").toString();
+        if(requestedChannel == channel){
             bufferedWriter.write("You are already in this channel!");
             return success.toJSON();
         }
-            channel = obj.get("channel").toString();
+        if(searchList(channelList, requestedChannel)){
+            channel = requestedChannel;
             return success.toJSON();
+        }
+        ErrorResponse error = new ErrorResponse("This channel doesn't exist");
+        return error.toJSON();
 
+    }
+
+    public boolean searchList(ArrayList<String> set, String item){
+        for (String current :set){
+            if(current.equals(item)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public JSONObject sendMessage(JSONObject obj) throws ParseException {
         JSONParser parser = new JSONParser();
         JSONObject message = (JSONObject)parser.parse(obj.get("message").toString());
+        obj.put("identity", channel);
         String userName = message.get("from").toString();
         String channel = obj.get("identity").toString();
         String body = message.get("body").toString();
@@ -127,6 +142,7 @@ public class ServerThread extends Thread{
                 return error.toJSON();
             }
         }
+        channelList.add(obj.get("identity").toString());
         SuccessResponse success = new SuccessResponse();
         return success.toJSON();
     }
@@ -143,10 +159,6 @@ public class ServerThread extends Thread{
         }catch(IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }
-    }
-
-    public void subscribe(String channel){
-        this.channel = channel;
     }
 
     public void unSubscribe(String channel){
@@ -188,7 +200,7 @@ public class ServerThread extends Thread{
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.userName = bufferedReader.readLine();
             serverThreads.add(this);
-            this.channel = "general";
+            this.channel = userName;
             serverMessage(userName, "has joined!");
         }catch(IOException ie)
         {

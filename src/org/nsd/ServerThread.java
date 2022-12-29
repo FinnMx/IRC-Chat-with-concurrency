@@ -220,6 +220,7 @@ public class ServerThread extends Thread{
         removeServerThread();
         try{
             if(fromClient != null && toClient != null && socket != null){
+                channelList.remove(userName);
                 fromClient.close();
                 toClient.close();
                 socket.close();
@@ -227,6 +228,10 @@ public class ServerThread extends Thread{
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    public void loadChannels(ArrayList<String> savedChannelList){
+        channelList = savedChannelList;
     }
 
     public ServerThread(Socket socket)

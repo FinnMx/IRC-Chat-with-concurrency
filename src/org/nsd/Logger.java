@@ -35,9 +35,11 @@ public class Logger {
 
     public String load(String channel){
         try{
-            ResultSet rs = statement.executeUpdate("SELECT Messagelog FROM Channels WHERE Channel = '" + channel + "'");
+            ResultSet rs = statement.executeQuery("SELECT Messagelog FROM Channels WHERE Channel = '" + channel + "'");
+            return rs.getString("Messagelog");
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
+        return null;
     }
 }

@@ -1,5 +1,6 @@
 package org.nsd;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class Logger {
     private Connection connection;
@@ -27,7 +28,7 @@ public class Logger {
 
     public void write(String channel, String message) {
         try {
-            statement.executeUpdate("UPDATE Channels SET Messagelog = '" + message + "' WHERE Channel = '" + channel + "'");
+            statement.executeUpdate("UPDATE Channels SET Messagelog = Messagelog || '" + message + "\n' WHERE Channel = '" + channel + "'");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -42,4 +43,18 @@ public class Logger {
         }
         return null;
     }
+
+    public ArrayList<String> loadAllChannels(){
+        ArrayList<String> channels = new ArrayList<>();
+        try{
+            ResultSet rs = statement.executeQuery("SELECT * channel FROM Channels");
+            while(rs.next()){
+                channels.add(rs.getString("channel"));
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return channels;
+    }
+
 }

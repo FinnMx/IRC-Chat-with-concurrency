@@ -122,12 +122,6 @@ public class ServerThread extends Thread{
         logger.close();
     }
 
-    public void logLoadFromDB(String channel){
-        Logger logger = new Logger("log.db");
-        logger.load(channel);
-        logger.close();
-    }
-
     public JSONObject subscribeRequest(JSONObject obj) throws IOException {
         SuccessResponse success = new SuccessResponse();
         String requestedChannel = obj.get("channel").toString();
@@ -163,7 +157,7 @@ public class ServerThread extends Thread{
         String body = message.get("body").toString();
         for(ServerThread serverThread : serverThreads){
                 if(!serverThread.userName.equals(userName) && serverThread.channel.equals(channel)){
-                    writeMessage(userName + ": " + body);
+                    serverThread.writeMessage(userName + ": " + body);
                 }
         }
         logMessageToDB(channel, userName + ": " + body);
@@ -230,8 +224,19 @@ public class ServerThread extends Thread{
         }
     }
 
-    public void loadChannels(ArrayList<String> savedChannelList){
-        channelList = savedChannelList;
+    public void reloadChannels(){
+        Logger logger = new Logger("log.db");
+        channelList = logger.loadAllChannels();
+        logger.close();
+    }
+
+    public void reloadMessages(){
+        Logger logger = new Logger("log.db");
+        String chat = logger.load(channel);
+        if(chat != null)
+            writeMessage(chat);
+
+        logger.close();
     }
 
     public ServerThread(Socket socket)
@@ -242,7 +247,9 @@ public class ServerThread extends Thread{
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.userName = bufferedReader.readLine();
             serverThreads.add(this);
+            reloadChannels();
             this.channel = "general";
+            reloadMessages();
             serverMessage(userName, "has joined!");
         }catch(IOException ie)
         {

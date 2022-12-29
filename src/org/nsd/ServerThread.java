@@ -116,6 +116,18 @@ public class ServerThread extends Thread{
         return success.toJSON();
     }
 
+    public void logMessageToDB(String channel, String message){
+        Logger logger = new Logger("log.db");
+        logger.write(channel,message);
+        logger.close();
+    }
+
+    public void logLoadFromDB(String channel){
+        Logger logger = new Logger("log.db");
+        logger.load(channel);
+        logger.close();
+    }
+
     public JSONObject subscribeRequest(JSONObject obj) throws IOException {
         SuccessResponse success = new SuccessResponse();
         String requestedChannel = obj.get("channel").toString();
@@ -154,6 +166,7 @@ public class ServerThread extends Thread{
                     writeMessage(userName + ": " + body);
                 }
         }
+        logMessageToDB(channel, userName + ": " + body);
         SuccessResponse success = new SuccessResponse();
         return success.toJSON();
     }
@@ -224,7 +237,7 @@ public class ServerThread extends Thread{
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.userName = bufferedReader.readLine();
             serverThreads.add(this);
-            this.channel = userName;
+            this.channel = "general";
             serverMessage(userName, "has joined!");
         }catch(IOException ie)
         {

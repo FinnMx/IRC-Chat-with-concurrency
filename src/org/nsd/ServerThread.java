@@ -118,9 +118,7 @@ public class ServerThread extends Thread{
     }
 
     public void logMessageToDB(String channel, String message){
-        Logger logger = new Logger("log.db");
         logger.write(channel, message);
-        logger.close();
     }
 
     public JSONObject subscribeRequest(JSONObject obj) throws IOException {
@@ -190,10 +188,8 @@ public class ServerThread extends Thread{
         channelList.add(obj.get("identity").toString());
         writeMessage("Channel " + obj.get("identity") + " has been created!");
         SuccessResponse success = new SuccessResponse();
-        if(!(obj.get("identity") == userName)) {
-            Logger logger = new Logger("log.db");
+        if(!userName.equals(obj.get("identity"))) {
             logger.writeChannel(obj.get("identity").toString());
-            logger.close();
         }
         return success.toJSON();
     }
@@ -221,6 +217,7 @@ public class ServerThread extends Thread{
         try{
             if(fromClient != null && toClient != null && socket != null){
                 channelList.remove(userName);
+                logger.close();
                 fromClient.close();
                 toClient.close();
                 socket.close();
@@ -231,18 +228,13 @@ public class ServerThread extends Thread{
     }
 
     public void reloadChannels(){
-        Logger logger = new Logger("log.db");
         channelList = logger.loadAllChannels();
-        logger.close();
     }
 
     public void reloadMessages(){
-        Logger logger = new Logger("log.db");
         String chat = logger.load(channel);
         if(chat != null)
             writeMessage(chat);
-
-        logger.close();
     }
 
     public ServerThread(Socket socket)

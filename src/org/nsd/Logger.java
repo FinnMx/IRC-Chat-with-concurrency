@@ -57,14 +57,14 @@ public class Logger {
         return channels;
     }
 
-    public void writeChannel(String channel){{
-        try{
-            statement.executeUpdate("INSERT INTO Channels VALUES('"+channel+"','')");
-        }catch (SQLException e){
-            System.out.println(e.getMessage());
+    public void writeChannel(String channel) {
+        {
+            try {
+                statement.executeUpdate("INSERT INTO Channels VALUES('" + channel + "','')");
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
-    }
-
     }
 
 }

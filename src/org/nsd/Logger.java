@@ -57,6 +57,14 @@ public class Logger {
         return channels;
     }
 
+    public void deleteChannel(String channel){
+        try {
+            statement.executeUpdate("DELETE FROM Channels WHERE Channel = '" + channel + "'");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public void writeChannel(String channel) {
         {
             try {

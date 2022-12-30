@@ -188,9 +188,7 @@ public class ServerThread extends Thread{
         channelList.add(obj.get("identity").toString());
         writeMessage("Channel " + obj.get("identity") + " has been created!");
         SuccessResponse success = new SuccessResponse();
-        if(!userName.equals(obj.get("identity"))) {
-            logger.writeChannel(obj.get("identity").toString());
-        }
+        logger.writeChannel(obj.get("identity").toString());
         return success.toJSON();
     }
 
@@ -206,6 +204,7 @@ public class ServerThread extends Thread{
         try {
             serverMessage(userName, "has left!");
             serverThreads.remove(this);
+            logger.deleteChannel(userName);
 
         }catch(IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);

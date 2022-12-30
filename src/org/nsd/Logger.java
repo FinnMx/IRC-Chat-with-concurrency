@@ -47,7 +47,7 @@ public class Logger {
     public ArrayList<String> loadAllChannels(){
         ArrayList<String> channels = new ArrayList<>();
         try{
-            ResultSet rs = statement.executeQuery("SELECT * Channel FROM Channels");
+            ResultSet rs = statement.executeQuery("SELECT Channel FROM Channels");
             while(rs.next()){
                 channels.add(rs.getString("Channel"));
             }

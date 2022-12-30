@@ -28,7 +28,7 @@ public class Logger {
 
     public void write(String channel, String message) {
         try {
-            statement.executeUpdate("UPDATE Channels SET Messagelog = Messagelog || '" + message + "\n' WHERE Channel = '" + channel + "'");
+            statement.executeUpdate("UPDATE Channels SET Messagelog = Messagelog || char(10) ||'" + message + "' WHERE Channel = '" + channel + "'");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -47,14 +47,24 @@ public class Logger {
     public ArrayList<String> loadAllChannels(){
         ArrayList<String> channels = new ArrayList<>();
         try{
-            ResultSet rs = statement.executeQuery("SELECT * channel FROM Channels");
+            ResultSet rs = statement.executeQuery("SELECT * Channel FROM Channels");
             while(rs.next()){
-                channels.add(rs.getString("channel"));
+                channels.add(rs.getString("Channel"));
             }
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
         return channels;
+    }
+
+    public void writeChannel(String channel){{
+        try{
+            statement.executeUpdate("INSERT INTO Channels VALUES('"+channel+"','')");
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
     }
 
 }

@@ -18,6 +18,7 @@ public class ServerThread extends Thread{
     private Socket socket;
     private BufferedWriter bufferedWriter;
     private BufferedReader bufferedReader;
+    private static Logger logger;
 
     private String channel;
 
@@ -118,7 +119,7 @@ public class ServerThread extends Thread{
 
     public void logMessageToDB(String channel, String message){
         Logger logger = new Logger("log.db");
-        logger.write(channel,message);
+        logger.write(channel, message);
         logger.close();
     }
 
@@ -189,6 +190,11 @@ public class ServerThread extends Thread{
         channelList.add(obj.get("identity").toString());
         writeMessage("Channel " + obj.get("identity") + " has been created!");
         SuccessResponse success = new SuccessResponse();
+        if(!(obj.get("identity") == userName)) {
+            Logger logger = new Logger("log.db");
+            logger.writeChannel(obj.get("identity").toString());
+            logger.close();
+        }
         return success.toJSON();
     }
 
@@ -247,6 +253,7 @@ public class ServerThread extends Thread{
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.userName = bufferedReader.readLine();
             serverThreads.add(this);
+            logger = new Logger("log.db");
             reloadChannels();
             this.channel = "general";
             reloadMessages();

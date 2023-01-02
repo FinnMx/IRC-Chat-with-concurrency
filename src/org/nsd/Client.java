@@ -68,6 +68,7 @@ public class Client{
             command = message.substring(0, i);
             instruction = message.substring(i + 1);
         }
+        //Using a switch case instead of a hashmap as we only have a few commands...
         switch (command){
             case "/help":
                 DefaultRequest help = new DefaultRequest("Help");
@@ -77,9 +78,13 @@ public class Client{
                 SubscribeRequest subReq = new SubscribeRequest(userName, instruction);
                 message = subReq.toJSONString();
                 break;
-            case "/unsubscribe":
-                UnsubscribeRequest unsubReq = new UnsubscribeRequest(userName, instruction);
+            case "/leave":
+                UnsubscribeRequest unsubReq = new UnsubscribeRequest(userName, "general");
                 message = unsubReq.toJSONString();
+                break;
+            case "/quit":
+                DefaultRequest quit = new DefaultRequest("Quit");
+                message = quit.toJSONString();
                 break;
             case "/create":
                 OpenRequest openReq = new OpenRequest(instruction);
@@ -108,10 +113,9 @@ public class Client{
             public void run() {
                 String response = null;
 
-                while(socket.isConnected()){
+                while(!socket.isClosed()){
                     try{
                         response = bufferedReader.readLine();
-
                         JSONParser parser = new JSONParser();
                         JSONObject obj = (JSONObject)parser.parse(response);
                         handleResponse(obj);
@@ -140,14 +144,9 @@ public class Client{
 
     public void handleResponse(JSONObject response) throws ParseException {
         switch(response.get("_class").toString()){
-            case "SuccessResponse":
-                //could print out messages here, would make more sense
-                break;
             case "ErrorResponse":
                 System.out.println(response.get("error"));
                 break;
-            default:
-
         }
     }
 
@@ -160,7 +159,6 @@ public class Client{
         Client client = new Client(socket, userName);
 
         client.recieveMessage();
-
         client.sendMessage();
     }
 }

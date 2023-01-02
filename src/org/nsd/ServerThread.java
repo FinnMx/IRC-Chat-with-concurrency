@@ -7,26 +7,27 @@ import org.nsd.responses.ErrorResponse;
 import org.nsd.responses.SuccessResponse;
 
 import java.io.*;
-import java.net.Socket;
-import java.util.ArrayList;
+import java.net.*;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class ServerThread extends Thread{
 
     public static ArrayList<ServerThread> serverThreads = new ArrayList<>();
     public static ArrayList<String> channelList = new ArrayList<>();
+
     private String userName;
     private Socket socket;
+    private String channel;
     private BufferedWriter bufferedWriter;
     private BufferedReader bufferedReader;
     private static Logger logger;
-
-    private String channel;
 
     @Override
     public void run() {
         String message;
 
-        while(socket.isConnected()){
+        while(!socket.isClosed()){
             try{
                 message = bufferedReader.readLine();
                 handleInput(message);
@@ -35,6 +36,7 @@ public class ServerThread extends Thread{
                 break;
             }
         }
+        closeAll(socket, bufferedWriter, bufferedReader);
     }
 
     public void writeMessage(String message){
@@ -61,6 +63,7 @@ public class ServerThread extends Thread{
     public void handleRequest(JSONObject obj) throws ParseException {
         try {
             JSONObject response = new JSONObject();
+            //Using a switch case instead of a hashmap as we only have a few commands...
             switch (obj.get("_class").toString()) {
                 case "PublishRequest":
                     response = sendMessage(obj);
@@ -71,24 +74,41 @@ public class ServerThread extends Thread{
                 case "SubscribeRequest":
                     response = subscribeRequest(obj);
                     break;
+                case "UnsubscribeRequest":
+                    response = unSubscribeRequest();
+                    break;
                 case "Help":
                     response = help();
                     break;
                 case "ViewChannels":
                     response = viewChannels();
                     break;
+                case "Quit":
+                    socket.close();
+                    return;
                 default:
                     response = invalid();
                     break;
             }
-            //this is where logging can be done for all requests/exchanges
             System.out.println(obj.toJSONString());
             System.out.println(response.toJSONString());
-
             writeMessage(response.toJSONString());
         }catch (IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }
+    }
+
+    public JSONObject unSubscribeRequest() throws IOException {
+        SuccessResponse success = new SuccessResponse();
+        if(channel == "general"){
+            writeMessage("Cannot leave general (Default channel)!");
+            return success.toJSON();
+        }
+        serverMessage(userName, "has left!");
+        channel = "general";
+        reloadMessages();
+        serverMessage(userName, "has joined!");
+        return success.toJSON();
     }
 
     public JSONObject viewChannels(){
@@ -111,6 +131,7 @@ public class ServerThread extends Thread{
                     - /create <channel> (create a new channel)
                     - /join <channel> (subscribes you to a channel/Joins a channel)
                     - /leave (disconnects you, sends you back to general)
+                    - /quit (closes your client)
                     - /viewchannels (displays a list of all channels)
                     - /get <timestamp> (returns all messages since the timestamp which is in seconds.)""");
         SuccessResponse success = new SuccessResponse();
@@ -130,6 +151,7 @@ public class ServerThread extends Thread{
         }
         if(searchList(channelList, requestedChannel)){
             channel = requestedChannel;
+            reloadMessages();
             serverMessage(obj.get("identity").toString(), "has joined!");
             return success.toJSON();
         }
@@ -190,10 +212,6 @@ public class ServerThread extends Thread{
         SuccessResponse success = new SuccessResponse();
         logger.writeChannel(obj.get("identity").toString());
         return success.toJSON();
-    }
-
-    public void unSubscribe(String channel){
-
     }
 
     public void get(int time){

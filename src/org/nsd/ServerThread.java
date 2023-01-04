@@ -211,8 +211,8 @@ public class ServerThread extends Thread{
         SuccessResponse success = new SuccessResponse();
         obj.get("after");
         String[] split = (logger.load(channel)).split("\n");
-        for(String message:split){
-            System.out.println(message.substring(1,8));
+        for(int i = 1; i <= split.length; i++){
+            split[i].substring(1,8); // cos it reads white space duhh
         }
         return success.toJSON();
     }

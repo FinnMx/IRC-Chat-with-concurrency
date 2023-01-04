@@ -5,6 +5,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.nsd.requests.*;
 
+import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
@@ -16,6 +17,8 @@ public class Client{
     private Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+
+
 
     public Client(Socket socket, String userName){
         try {

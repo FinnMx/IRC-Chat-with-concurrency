@@ -48,6 +48,10 @@ public class Logger {
         ArrayList<String> channels = new ArrayList<>();
         try{
             ResultSet rs = statement.executeQuery("SELECT Channel FROM Channels");
+            if(rs.getString("Channel") == null) {
+                writeChannel("general");
+                channels.add("general");
+            }
             while(rs.next()){
                 channels.add(rs.getString("Channel"));
             }

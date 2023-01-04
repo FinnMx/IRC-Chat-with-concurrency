@@ -29,22 +29,21 @@ public class Client{
     }
 
     public void sendMessage(){
-        try{
-            OpenRequest openReq = new OpenRequest(userName);
-            bufferedWriter.write(userName);
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-            bufferedWriter.write(openReq.toJSONString());
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
+        OpenRequest openReq = new OpenRequest(userName);
+        writeMessage(userName);
+        writeMessage(openReq.toJSONString());
+        Scanner scanner = new Scanner(System.in);
+        while(!socket.isClosed()){
+            String message = scanner.nextLine();
+            writeMessage(handleInput(message));
+        }
+    }
 
-            Scanner scanner = new Scanner(System.in);
-            while(!socket.isClosed()){
-                String message = scanner.nextLine();
-                bufferedWriter.write(handleInput(message));
-                bufferedWriter.newLine();
-                bufferedWriter.flush();
-            }
+    public void writeMessage(String message){
+        try {
+            bufferedWriter.write(message);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
         }catch (IOException e){
             e.printStackTrace();
         }

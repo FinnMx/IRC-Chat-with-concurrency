@@ -121,7 +121,7 @@ public class Client{
                         handleResponse(obj);
                     }catch(ParseException e){
                         System.out.println(response);
-                    }catch (IOException i){
+                    }catch (IOException | NullPointerException i ){
                         closeAll(socket, bufferedWriter, bufferedReader);
                     }
                 }

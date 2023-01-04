@@ -37,7 +37,6 @@ public class ServerThread extends Thread{
                 break;
             }
         }
-        closeAll(socket, bufferedWriter, bufferedReader);
     }
 
     public void writeMessage(String message){

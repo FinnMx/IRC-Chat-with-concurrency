@@ -3,14 +3,11 @@ package org.nsd;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.nsd.requests.DefaultRequest;
-import org.nsd.responses.ErrorResponse;
-import org.nsd.responses.SuccessResponse;
+import org.nsd.responses.*;
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.function.Consumer;
 
 public class ServerThread extends Thread{
 
@@ -100,7 +97,7 @@ public class ServerThread extends Thread{
 
     public JSONObject unSubscribeRequest() throws IOException {
         SuccessResponse success = new SuccessResponse();
-        if(channel == "general"){
+        if(channel.equals("general")){
             writeMessage("Cannot leave general (Default channel)!");
             return success.toJSON();
         }

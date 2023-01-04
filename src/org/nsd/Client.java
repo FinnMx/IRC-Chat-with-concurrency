@@ -147,6 +147,9 @@ public class Client{
             case "ErrorResponse":
                 System.out.println(response.get("error"));
                 break;
+            case "Quit":
+                closeAll(socket, bufferedWriter, bufferedReader);
+                break;
         }
     }
 

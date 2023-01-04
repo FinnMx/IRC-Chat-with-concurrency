@@ -3,6 +3,7 @@ package org.nsd;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.nsd.requests.DefaultRequest;
 import org.nsd.responses.ErrorResponse;
 import org.nsd.responses.SuccessResponse;
 
@@ -84,8 +85,8 @@ public class ServerThread extends Thread{
                     response = viewChannels();
                     break;
                 case "Quit":
-                    socket.close();
-                    return;
+                    closeAll(socket, bufferedWriter, bufferedReader);
+                    break;
                 default:
                     response = invalid();
                     break;
@@ -221,8 +222,8 @@ public class ServerThread extends Thread{
     public void removeServerThread() {
         try {
             serverMessage(userName, "has left!");
-            serverThreads.remove(this);
             logger.deleteChannel(userName);
+            serverThreads.remove(this);
 
         }catch(IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
@@ -251,7 +252,7 @@ public class ServerThread extends Thread{
     public void reloadMessages(){
         String chat = logger.load(channel);
         if(chat != null)
-            writeMessage(chat);
+            writeMessage(chat.trim());
     }
 
     public ServerThread(Socket socket)

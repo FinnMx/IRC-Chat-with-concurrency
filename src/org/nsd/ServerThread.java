@@ -4,9 +4,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.nsd.responses.*;
+import java.time.*;
 
 import java.io.*;
 import java.net.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ServerThread extends Thread{
@@ -154,17 +156,26 @@ public class ServerThread extends Thread{
         JSONParser parser = new JSONParser();
         JSONObject message = (JSONObject)parser.parse(obj.get("message").toString());
         obj.put("identity", channel);
-        String userName = message.get("from").toString();
         String channel = obj.get("identity").toString();
         String body = message.get("body").toString();
+        message.put("when", getTime());
+        obj.put("message", message.toJSONString());
+        //actual message sending
+        String realMessage = ("(" + getTime() + ") " + userName + ": " + body);
         for(ServerThread serverThread : serverThreads){
                 if(!serverThread.userName.equals(userName) && serverThread.channel.equals(channel)){
-                    serverThread.writeMessage(userName + ": " + body);
+                    serverThread.writeMessage(realMessage);
                 }
         }
-        logMessageToDB(channel, userName + ": " + body);
+        logMessageToDB(channel,realMessage);
         SuccessResponse success = new SuccessResponse();
         return success.toJSON();
+    }
+
+    public String getTime(){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalDateTime time = LocalDateTime.now();
+        return dtf.format(time);
     }
 
     public void serverMessage(String userName, String message) throws IOException {

@@ -37,14 +37,14 @@ public class Client{
             bufferedWriter.flush();
 
             Scanner scanner = new Scanner(System.in);
-            while(socket.isConnected()){
+            while(!socket.isClosed()){
                 String message = scanner.nextLine();
                 bufferedWriter.write(handleInput(message));
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
             }
         }catch (IOException e){
-            closeAll(socket, bufferedWriter, bufferedReader);
+            e.printStackTrace();
         }
     }
 
@@ -108,24 +108,23 @@ public class Client{
 
 
     public void recieveMessage(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String response = null;
+        new Thread(() -> {
+            String response = null;
 
-                while(!socket.isClosed()){
-                    try{
-                        response = bufferedReader.readLine();
-                        JSONParser parser = new JSONParser();
-                        JSONObject obj = (JSONObject)parser.parse(response);
-                        handleResponse(obj);
-                    }catch(ParseException e){
-                        System.out.println(response);
-                    }catch (IOException | NullPointerException i ){
-                        closeAll(socket, bufferedWriter, bufferedReader);
-                    }
+            while(!socket.isClosed()){
+                try{
+                    response = bufferedReader.readLine();
+                    JSONParser parser = new JSONParser();
+                    JSONObject obj = (JSONObject)parser.parse(response);
+                    handleResponse(obj);
+                }catch(ParseException e){
+                    System.out.println(response);
+                }catch (IOException | NullPointerException i ){
+                    closeAll(socket, bufferedWriter, bufferedReader);
                 }
             }
+            System.exit(0); //for some reason the program terminates but lingers here for no reason
+                                   //I can't figure out why this is for the life of me.
         }).start();
 
     }
@@ -143,13 +142,9 @@ public class Client{
     }
 
     public void handleResponse(JSONObject response) throws ParseException {
-        switch(response.get("_class").toString()){
-            case "ErrorResponse":
-                System.out.println(response.get("error"));
-                break;
-            case "Quit":
-                closeAll(socket, bufferedWriter, bufferedReader);
-                break;
+        switch (response.get("_class").toString()) {
+            case "ErrorResponse" -> System.out.println(response.get("error"));
+            case "Quit" -> closeAll(socket, bufferedWriter, bufferedReader);
         }
     }
 

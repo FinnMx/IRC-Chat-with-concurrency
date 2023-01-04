@@ -19,7 +19,7 @@ public class ServerThread extends Thread{
     private String channel;
     private BufferedWriter bufferedWriter;
     private BufferedReader bufferedReader;
-    private static Logger logger;
+    private Logger logger;
 
     @Override
     public void run() {
@@ -62,30 +62,14 @@ public class ServerThread extends Thread{
             JSONObject response = new JSONObject();
             //Using a switch case instead of a hashmap as we only have a few commands...
             switch (obj.get("_class").toString()) {
-                case "PublishRequest":
-                    response = sendMessage(obj);
-                    break;
-                case "OpenRequest":
-                    response = openRequest(obj);
-                    break;
-                case "SubscribeRequest":
-                    response = subscribeRequest(obj);
-                    break;
-                case "UnsubscribeRequest":
-                    response = unSubscribeRequest();
-                    break;
-                case "Help":
-                    response = help();
-                    break;
-                case "ViewChannels":
-                    response = viewChannels();
-                    break;
-                case "Quit":
-                    closeAll(socket, bufferedWriter, bufferedReader);
-                    break;
-                default:
-                    response = invalid();
-                    break;
+                case "PublishRequest" -> response = sendMessage(obj);
+                case "OpenRequest" -> response = openRequest(obj);
+                case "SubscribeRequest" -> response = subscribeRequest(obj);
+                case "UnsubscribeRequest" -> response = unSubscribeRequest();
+                case "Help" -> response = help();
+                case "ViewChannels" -> response = viewChannels();
+                case "Quit" -> closeAll(socket, bufferedWriter, bufferedReader);
+                default -> response = invalid();
             }
             System.out.println(obj.toJSONString());
             System.out.println(response.toJSONString());

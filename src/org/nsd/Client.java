@@ -7,6 +7,8 @@ import org.nsd.requests.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Client{
@@ -91,7 +93,7 @@ public class Client{
                 message = openReq.toJSONString();
                 break;
             case "/get":
-                GetRequest getReq = new GetRequest(userName, Integer.parseInt(instruction));
+                GetRequest getReq = new GetRequest(userName, getRequestedTime(Integer.parseInt(instruction)));
                 message = getReq.toJSONString();
                 break;
             case "/viewchannels":
@@ -104,6 +106,12 @@ public class Client{
                 break;
         }
         return message;
+    }
+
+    public String getRequestedTime(int mins){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalDateTime time = LocalDateTime.now().minusMinutes(mins);
+        return dtf.format(time);
     }
 
 

@@ -3,9 +3,9 @@ package org.nsd.requests;
 import org.json.simple.JSONObject;
 
 public class GetRequest extends Request {
-    private int after;
+    private String after;
 
-    public GetRequest(String userName, int time){
+    public GetRequest(String userName, String time){
         set_class(GetRequest.class.getSimpleName());
         setIdentity(userName);
         this.after = time;
@@ -15,7 +15,7 @@ public class GetRequest extends Request {
         JSONObject obj = new JSONObject();
         obj.put("_class", get_class());
         obj.put("identity", getIdentity());
-        obj.put("aftet", after);
+        obj.put("after", after);
         return obj;
     }
 }

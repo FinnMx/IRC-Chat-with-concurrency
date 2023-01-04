@@ -68,6 +68,7 @@ public class ServerThread extends Thread{
                 case "OpenRequest" -> response = openRequest(obj);
                 case "SubscribeRequest" -> response = subscribeRequest(obj);
                 case "UnsubscribeRequest" -> response = unSubscribeRequest();
+                case "GetRequest" -> response = getRequest(obj);
                 case "Help" -> response = help();
                 case "ViewChannels" -> response = viewChannels();
                 case "Quit" -> closeAll(socket, bufferedWriter, bufferedReader);
@@ -206,8 +207,14 @@ public class ServerThread extends Thread{
         return success.toJSON();
     }
 
-    public void get(int time){
-
+    public JSONObject getRequest(JSONObject obj){
+        SuccessResponse success = new SuccessResponse();
+        obj.get("after");
+        String[] split = (logger.load(channel)).split("\n");
+        for(String message:split){
+            System.out.println(message.substring(1,8));
+        }
+        return success.toJSON();
     }
 
     public void removeServerThread() {
@@ -215,7 +222,6 @@ public class ServerThread extends Thread{
             serverMessage(userName, "has left!");
             logger.deleteChannel(userName);
             serverThreads.remove(this);
-
         }catch(IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }

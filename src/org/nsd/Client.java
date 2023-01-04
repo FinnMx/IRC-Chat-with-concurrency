@@ -158,9 +158,15 @@ public class Client{
 
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter your username: ");
-        String userName = scanner.nextLine();
-
+        String userName;
+        System.out.println("--------------------------------------------------\n"+
+                           "         NSD IRC-Chat by finn moorhouse\n" +
+                           "Type /help once your in to view a list of commands\n"+
+                            "--------------------------------------------------");
+        do {
+            System.out.println("Enter your username (must be >3 characters): ");
+            userName = scanner.nextLine();
+        }while (userName.length() <= 3);
         Socket socket = new Socket("localhost", 2123);
         Client client = new Client(socket, userName);
 

@@ -76,7 +76,8 @@ public class ServerThread extends Thread{
             }
             System.out.println(obj.toJSONString());
             System.out.println(response.toJSONString());
-            writeMessage(response.toJSONString());
+            if(response.size() != 0)
+                writeMessage(response.toJSONString());
         }catch (IOException e){
             closeAll(socket, bufferedWriter, bufferedReader);
         }
@@ -117,7 +118,7 @@ public class ServerThread extends Thread{
                     - /leave (disconnects you, sends you back to general)
                     - /quit (closes your client)
                     - /viewchannels (displays a list of all channels)
-                    - /get <timestamp> (returns all messages since the timestamp which is in seconds.)""");
+                    - /get <minutes> (returns all messages since x amount of mins ago, within the channel your in)""");
         SuccessResponse success = new SuccessResponse();
         return success.toJSON();
     }
@@ -209,10 +210,14 @@ public class ServerThread extends Thread{
 
     public JSONObject getRequest(JSONObject obj){
         SuccessResponse success = new SuccessResponse();
-        obj.get("after");
+        String after = obj.get("after").toString();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalTime requestedTime = LocalTime.parse(after, dtf);
         String[] split = (logger.load(channel)).split("\n");
-        for(int i = 1; i <= split.length; i++){
-            split[i].substring(1,8); // cos it reads white space duhh
+        for (String s : split) {
+            LocalTime time = LocalTime.parse(s.substring(1, 9), dtf);
+            if (time.isAfter(requestedTime))
+                writeMessage("GET RETURNED : " + s);
         }
         return success.toJSON();
     }
@@ -249,7 +254,7 @@ public class ServerThread extends Thread{
     public void reloadMessages(){
         String chat = logger.load(channel);
         if(chat != null)
-            writeMessage(chat.trim());
+            writeMessage(chat);
     }
 
     public ServerThread(Socket socket)
